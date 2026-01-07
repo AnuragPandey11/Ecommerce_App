@@ -1,4 +1,4 @@
-package com.ecom.security;
+package com.ecom.util;
 
 import org.springframework.stereotype.Component;
 
