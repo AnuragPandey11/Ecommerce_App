@@ -29,6 +29,9 @@ import com.ecom.util.FileUploadUtil;
 import com.ecom.service.ProductService;
 import com.ecom.util.HtmlSanitizerUtils;
 import com.ecom.util.SlugUtils;
+import com.ecom.specification.ProductSpecification;
+import org.springframework.data.jpa.domain.Specification;
+import java.math.BigDecimal;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
     private final SlugUtils slugUtils;
     private final HtmlSanitizerUtils htmlSanitizerUtils;
     private final FileUploadUtil fileUploadUtil;
+    private final ProductSpecification productSpecification;
 
     @Override
     public ProductResponse createProduct(ProductRequest request, List<MultipartFile> images) {
@@ -101,15 +105,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public PagedResponse<ProductResponse> getProducts(Pageable pageable, Long categoryId, String search) {
-        Page<Product> page;
-        if (categoryId != null) {
-            page = productRepository.findByCategoryIdAndActive(categoryId, pageable);
-        } else if (search != null && !search.isBlank()) {
-            page = productRepository.searchByNameAndActive(search, pageable);
-        } else {
-            page = productRepository.findAllActive(pageable);
-        }
+    public PagedResponse<ProductResponse> getProducts(Pageable pageable, String search, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
+        Specification<Product> spec = Specification.where(productSpecification.isActive())
+                .and(productSpecification.hasNameOrDescription(search))
+                .and(productSpecification.inCategory(categoryId))
+                .and(productSpecification.hasPriceBetween(minPrice, maxPrice));
+
+        Page<Product> page = productRepository.findAll(spec, pageable);
 
         List<ProductResponse> content = page.getContent()
                 .stream()
