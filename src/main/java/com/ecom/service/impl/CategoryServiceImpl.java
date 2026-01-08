@@ -8,8 +8,7 @@ import com.ecom.entity.Category;
 import com.ecom.exception.BadRequestException;
 import com.ecom.repository.CategoryRepository;
 import com.ecom.service.CategoryService;
-import com.ecom.util.SlugUtils;
-
+import com.ecom.security.SlugUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

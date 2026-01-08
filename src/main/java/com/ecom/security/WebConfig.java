@@ -1,4 +1,4 @@
-package com.ecom.config;
+package com.ecom.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

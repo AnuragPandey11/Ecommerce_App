@@ -15,7 +15,7 @@ public interface ProductService {
 
     ProductResponse getProductBySlug(String slug);
 
-    PagedResponse<ProductResponse> getProducts(Pageable pageable, String search, Long categoryId, java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice);
+    PagedResponse<ProductResponse> getProducts(Pageable pageable, Long categoryId, String search);
 
     ProductResponse updateInventory(Long productId, Integer inventory);
 

@@ -1,9 +1,8 @@
-package com.ecom.service.impl;
+package com.ecom.security;
+
 
 import com.ecom.entity.User;
 import com.ecom.repository.UserRepository;
-import com.ecom.security.UserPrincipal;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         var authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
                 .collect(Collectors.toSet());
 
         return UserPrincipal.create(user, authorities);
