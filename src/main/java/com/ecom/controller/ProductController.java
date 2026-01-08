@@ -11,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -20,16 +19,6 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
-    @PostMapping(consumes = "application/json")
-    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
-            @Valid @RequestBody ProductRequest request
-    ) {
-        ProductResponse response = productService.createProduct(request, null);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Product created successfully", response));
-    }
 
     @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -47,10 +36,8 @@ public class ProductController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             @RequestParam(value = "sort", defaultValue = "createdAt,DESC") String sort,
-            @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
-            @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
-            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice
+            @RequestParam(value = "search", required = false) String search
     ) {
         String[] sortParams = sort.split(",");
         Sort.Direction direction = sortParams.length > 1
@@ -63,7 +50,7 @@ public class ProductController {
         );
 
         PagedResponse<ProductResponse> paged = productService.getProducts(
-                pageable, search, categoryId, minPrice, maxPrice
+                pageable, categoryId, search
         );
         return ResponseEntity.ok(ApiResponse.success(paged));
     }

@@ -1,4 +1,4 @@
-package com.ecom.config;
+package com.ecom.security;
 
 
 import java.util.concurrent.Executor;

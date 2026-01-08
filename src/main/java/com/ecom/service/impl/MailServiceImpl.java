@@ -63,37 +63,4 @@ public class MailServiceImpl implements MailService {
             throw new RuntimeException("Failed to send verification email", ex);
         }
     }
-    @Override
-public void sendPasswordResetEmail(String toEmail, String token) {
-    String resetUrl = frontendBaseUrl + "/reset-password?token=" + token;
-
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setFrom(fromEmail);
-    message.setTo(toEmail);
-    message.setSubject("🔐 Reset Your Password");
-    message.setText(String.format("""
-            Hello,
-            
-            We received a request to reset your password.
-            
-            🔗 Click here to reset your password:
-            %s
-            
-            ⚠️ This link is valid for 60 minutes only.
-            
-            If you didn't request this, please ignore this email.
-            
-            Best regards,
-            E-Commerce Team
-            """, resetUrl));
-
-    try {
-        mailSender.send(message);
-        log.info("✅ Password reset email sent successfully to: {}", toEmail);
-    } catch (Exception ex) {
-        log.error("❌ Failed to send password reset email to {}: {}", toEmail, ex.getMessage(), ex);
-        throw new RuntimeException("Failed to send password reset email", ex);
-    }
-}
-
 }

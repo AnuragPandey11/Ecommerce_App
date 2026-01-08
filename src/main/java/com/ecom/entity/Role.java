@@ -2,9 +2,6 @@ package com.ecom.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "roles")
@@ -14,18 +11,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Role {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, unique = true, length = 50)
-    private String name;  // ✅ Use String, not enum
-
-    @Column(length = 255)
-    private String description;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    
+    @Column(name = "role_name", nullable = false, unique = true, length = 50)
+    @Enumerated(EnumType.STRING)
+    private RoleName roleName;
+    
+    public enum RoleName {
+        ROLE_USER,
+        ROLE_STAFF,
+        ROLE_ADMIN
+    }
 }

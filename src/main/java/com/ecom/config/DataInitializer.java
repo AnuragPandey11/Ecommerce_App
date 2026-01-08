@@ -11,13 +11,12 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Profile({"dev", "default"})
+@Profile({"dev", "default"}) // adjust if you also want this in prod
 public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
@@ -28,58 +27,36 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Running DataInitializer...");
 
-        // ✅ FIXED: Create roles using String name instead of enum
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                .orElseGet(() -> {
-                    Role role = Role.builder()
-                            .name("ROLE_ADMIN")
-                            .description("Administrator role with full access")
-                            .build();
-                    return roleRepository.save(role);
-                });
+        Role adminRole = roleRepository.findByRoleName(Role.RoleName.ROLE_ADMIN)
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder().roleName(Role.RoleName.ROLE_ADMIN).build()
+                ));
 
-        Role staffRole = roleRepository.findByName("ROLE_STAFF")
-                .orElseGet(() -> {
-                    Role role = Role.builder()
-                            .name("ROLE_STAFF")
-                            .description("Staff role with limited administrative access")
-                            .build();
-                    return roleRepository.save(role);
-                });
+        Role staffRole = roleRepository.findByRoleName(Role.RoleName.ROLE_STAFF)
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder().roleName(Role.RoleName.ROLE_STAFF).build()
+                ));
 
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseGet(() -> {
-                    Role role = Role.builder()
-                            .name("ROLE_USER")
-                            .description("Default user role")
-                            .build();
-                    return roleRepository.save(role);
-                });
+        Role userRole = roleRepository.findByRoleName(Role.RoleName.ROLE_USER)
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder().roleName(Role.RoleName.ROLE_USER).build()
+                ));
 
-        log.info("Roles initialized: ROLE_ADMIN, ROLE_STAFF, ROLE_USER");
-
-        // Create default admin user
         String adminEmail = "admin@ecom.local";
         if (!userRepository.existsByEmail(adminEmail)) {
-            Set<Role> adminRoles = new HashSet<>();
-            adminRoles.add(adminRole);
-            adminRoles.add(staffRole);
-            adminRoles.add(userRole);
-
             User admin = User.builder()
                     .name("Super Admin")
                     .email(adminEmail)
                     .passwordHash(passwordEncoder.encode("Admin@12345"))
                     .isVerified(true)
-                    .roles(adminRoles)
+                    .oauthProvider(User.OAuthProvider.LOCAL)
+                    .roles(Set.of(adminRole, staffRole, userRole))
                     .build();
-            
             userRepository.save(admin);
-            log.info("✅ Created default admin user with email: {}", adminEmail);
-            log.info("   Username: {}", adminEmail);
-            log.info("   Password: Admin@12345");
+            log.info("Created default admin user with email: {}", adminEmail);
         } else {
-            log.info("ℹ️  Admin user already exists, skipping creation");
+            log.info("Admin user already exists, skipping creation");
         }
     }
 }
+

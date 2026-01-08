@@ -45,14 +45,6 @@ public class Product {
     @Column(nullable = false)
     @Builder.Default
     private Integer inventory = 0;
-
-    @Column(name = "average_rating", nullable = false)
-    @Builder.Default
-    private Double averageRating = 0.0;
-
-    @Column(name = "review_count", nullable = false)
-    @Builder.Default
-    private Integer reviewCount = 0;
     
     @Column(name = "description_html", columnDefinition = "TEXT")
     private String descriptionHtml;
@@ -73,10 +65,6 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ProductImage> images = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Review> reviews = new ArrayList<>();
     
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
