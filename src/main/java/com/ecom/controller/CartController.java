@@ -1,8 +1,6 @@
 package com.ecom.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,11 +37,21 @@ public ResponseEntity<ApiResponse<CartResponse>> addToCart(
 
     @GetMapping
     public ResponseEntity<ApiResponse<CartResponse>> getCart(
-            @AuthenticationPrincipal UserDetails userDetails
+            @CurrentUser UserPrincipal principal
     ) {
-        Long userId = Long.parseLong(userDetails.getUsername());
+        Long userId = principal.getId();
         CartResponse response = cartService.getCart(userId);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/apply-discount")
+    public ResponseEntity<ApiResponse<CartResponse>> applyDiscount(
+            @CurrentUser UserPrincipal principal,
+            @Valid @RequestBody com.ecom.dto.ApplyDiscountRequest request
+    ) {
+        Long userId = principal.getId();
+        CartResponse response = cartService.applyDiscount(userId, request);
+        return ResponseEntity.ok(ApiResponse.success("Discount applied successfully", response));
     }
 }
 
