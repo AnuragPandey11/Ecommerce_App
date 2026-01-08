@@ -1,23 +1,39 @@
 package com.ecom.service.impl;
 
 
-import com.ecom.dto.ProductRequest;
-import com.ecom.dto.*;
-import com.ecom.entity.*;
-import com.ecom.exception.ResourceNotFoundException;
-import com.ecom.repository.*;
-import com.ecom.service.ProductService;
-import com.ecom.security.HtmlSanitizerUtils;
-import com.ecom.security.SlugUtils;
-import com.ecom.security.FileUploadUtils;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.ecom.dto.CategoryResponse;
+import com.ecom.dto.PagedResponse;
+import com.ecom.dto.ProductImageResponse;
+import com.ecom.dto.ProductRequest;
+import com.ecom.dto.ProductResponse;
+import com.ecom.entity.Category;
+import com.ecom.entity.Product;
+import com.ecom.entity.ProductImage;
+import com.ecom.exception.ResourceNotFoundException;
+import com.ecom.repository.CategoryRepository;
+import com.ecom.repository.ProductRepository;
+import com.ecom.util.FileUploadUtil;
+import com.ecom.service.ProductService;
+import com.ecom.util.HtmlSanitizerUtils;
+import com.ecom.util.SlugUtils;
+import com.ecom.specification.ProductSpecification;
+import org.springframework.data.jpa.domain.Specification;
+import java.math.BigDecimal;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +44,8 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final SlugUtils slugUtils;
     private final HtmlSanitizerUtils htmlSanitizerUtils;
-    private final FileUploadUtils fileUploadUtils;
+    private final FileUploadUtil fileUploadUtil;
+    private final ProductSpecification productSpecification;
 
     @Override
     public ProductResponse createProduct(ProductRequest request, List<MultipartFile> images) {
@@ -63,7 +80,8 @@ public class ProductServiceImpl implements ProductService {
         if (images != null && !images.isEmpty()) {
             int order = 0;
             for (MultipartFile file : images) {
-                String url = fileUploadUtils.storeFile(file);
+                // ✅ FIXED: Changed from storeFile to uploadFile
+                String url = fileUploadUtil.uploadFile(file, "products");
                 ProductImage image = ProductImage.builder()
                         .product(saved)
                         .imageUrl(url)
@@ -87,15 +105,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public PagedResponse<ProductResponse> getProducts(Pageable pageable, Long categoryId, String search) {
-        Page<Product> page;
-        if (categoryId != null) {
-            page = productRepository.findByCategoryIdAndActive(categoryId, pageable);
-        } else if (search != null && !search.isBlank()) {
-            page = productRepository.searchByNameAndActive(search, pageable);
-        } else {
-            page = productRepository.findAllActive(pageable);
-        }
+    public PagedResponse<ProductResponse> getProducts(Pageable pageable, String search, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
+        Specification<Product> spec = Specification.where(productSpecification.isActive())
+                .and(productSpecification.hasNameOrDescription(search))
+                .and(productSpecification.inCategory(categoryId))
+                .and(productSpecification.hasPriceBetween(minPrice, maxPrice));
+
+        Page<Product> page = productRepository.findAll(spec, pageable);
 
         List<ProductResponse> content = page.getContent()
                 .stream()

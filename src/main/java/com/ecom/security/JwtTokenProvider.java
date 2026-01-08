@@ -1,7 +1,5 @@
 package com.ecom.security;
 
-
-
 import com.ecom.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -39,24 +37,24 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessToken(Authentication authentication) {
-    UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
 
-    Date now = new Date();
-    Date expiryDate = new Date(now.getTime() + accessTokenExpirationMs);
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + accessTokenExpirationMs);
 
-    String roles = principal.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(","));
+        String roles = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
-    return Jwts.builder()
-            .subject(principal.getUsername())          // email
-            .claim("uid", principal.getId())              // userId
-            .claim("roles", roles)
-            .issuedAt(now)
-            .expiration(expiryDate)
-            .signWith(key)
-            .compact();
-}
+        return Jwts.builder()
+                .subject(principal.getUsername())          // email
+                .claim("uid", principal.getId())           // userId
+                .claim("roles", roles)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
+    }
 
     public String generateRefreshToken(User user) {
         Date now = new Date();
@@ -93,40 +91,41 @@ public class JwtTokenProvider {
     }
 
     public Long getUserIdFromJWT(String token) {
-    Claims claims = Jwts.parser()
-            .verifyWith((javax.crypto.SecretKey) key)
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
-    Object uid = claims.get("uid");
-    return uid instanceof Integer ? ((Integer) uid).longValue() : (Long) uid;
-}
+        Claims claims = Jwts.parser()
+                .verifyWith((javax.crypto.SecretKey) key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        Object uid = claims.get("uid");
+        return uid instanceof Integer ? ((Integer) uid).longValue() : (Long) uid;
+    }
 
-public long getAccessTokenExpirationMs() {
-    return accessTokenExpirationMs;
-}
+    public long getAccessTokenExpirationMs() {
+        return accessTokenExpirationMs;
+    }
 
-public String generateTokenFromUser(User user) {
-    var authorities = user.getRoles().stream()
-            .map(r -> new SimpleGrantedAuthority(r.getRoleName().name()))
-            .collect(Collectors.toSet());
-    UserPrincipal principal = UserPrincipal.create(user, authorities);
+    public String generateTokenFromUser(User user) {
+        // ✅ FIXED: Changed from r.getRoleName().name() to r.getName()
+        var authorities = user.getRoles().stream()
+                .map(r -> new SimpleGrantedAuthority(r.getName()))
+                .collect(Collectors.toSet());
+        
+        UserPrincipal principal = UserPrincipal.create(user, authorities);
 
-    Date now = new Date();
-    Date expiryDate = new Date(now.getTime() + accessTokenExpirationMs);
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + accessTokenExpirationMs);
 
-    String roles = principal.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(","));
+        String roles = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
-    return Jwts.builder()
-            .subject(principal.getUsername())
-            .claim("uid", principal.getId())
-            .claim("roles", roles)
-            .issuedAt(now)
-            .expiration(expiryDate)
-            .signWith(key)
-            .compact();
-}
-
+        return Jwts.builder()
+                .subject(principal.getUsername())
+                .claim("uid", principal.getId())
+                .claim("roles", roles)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
+    }
 }
