@@ -49,22 +49,43 @@ public class ImageController {
         return ResponseEntity.ok(ApiResponse.success("Image uploaded successfully", image));
     }
 
-    // Serve image file
     @GetMapping("/files/{filename:.+}")
     public ResponseEntity<Resource> serveImage(@PathVariable String filename) {
         try {
-            Path filePath = fileUploadUtil.getFilePath(filename);
-            Resource resource = new UrlResource(filePath.toUri());
+            // 1. Define possible paths
+            Path rootPath = fileUploadUtil.getFilePath(filename);
+            Path productPath = fileUploadUtil.getFilePath("products/" + filename);
 
-            if (resource.exists()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) // Default to JPEG
+            // 🛑 DEBUG LOGS (Check your Spring Boot Console for these!)
+            System.out.println("---------------- IMAGE DEBUG ----------------");
+            System.out.println("🔎 Requesting: " + filename);
+            System.out.println("📂 Checking Root: " + rootPath.toAbsolutePath());
+            System.out.println("📂 Checking Product Folder: " + productPath.toAbsolutePath());
+
+            Resource resource = new UrlResource(rootPath.toUri());
+
+            // 2. Check Root
+            if (resource.exists() && resource.isReadable()) {
+                System.out.println("✅ Found in Root!");
+                return ResponseEntity.ok().body(resource);
+            }
+
+            // 3. Check Product Folder
+            resource = new UrlResource(productPath.toUri());
+            if (resource.exists() && resource.isReadable()) {
+                System.out.println("✅ Found in Product Folder!");
+                 return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                         .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
             }
+
+            System.out.println("❌ NOT FOUND in either location.");
+            System.out.println("---------------------------------------------");
+            return ResponseEntity.notFound().build();
+
         } catch (Exception e) {
+            e.printStackTrace(); // Print full error if path is invalid
             return ResponseEntity.notFound().build();
         }
     }

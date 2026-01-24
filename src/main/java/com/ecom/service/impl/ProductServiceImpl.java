@@ -95,6 +95,30 @@ public class ProductServiceImpl implements ProductService {
         return mapToProductResponse(saved);
     }
 
+    @Override
+    public ProductResponse addProductImages(Long productId, List<MultipartFile> files) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
+
+        if (files != null && !files.isEmpty()) {
+            int currentOrder = product.getImages() != null ? product.getImages().size() : 0;
+
+            for (MultipartFile file : files) {
+                String url = fileUploadUtil.uploadFile(file, "products");
+                ProductImage image = ProductImage.builder()
+                        .product(product)
+                        .imageUrl(url)
+                        .displayOrder(++currentOrder)
+                        .isPrimary(currentOrder == 1)
+                        .build();
+                product.addImage(image);
+            }
+            Product saved = productRepository.save(product);
+            return mapToProductResponse(saved);
+        }
+        return mapToProductResponse(product);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public ProductResponse getProductBySlug(String slug) {
