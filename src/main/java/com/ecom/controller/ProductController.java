@@ -85,4 +85,11 @@ public class ProductController {
         ProductResponse response = productService.updateInventory(id, inventory);
         return ResponseEntity.ok(ApiResponse.success("Inventory updated", response));
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.ok(ApiResponse.success("Product deleted successfully"));
+    }
 }

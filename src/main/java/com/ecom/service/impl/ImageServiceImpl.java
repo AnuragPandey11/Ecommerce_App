@@ -98,6 +98,8 @@ public class ImageServiceImpl implements ImageService {
                 .orElseThrow(() -> new ResourceNotFoundException("Image", "id", imageId));
 
         image.setIsPrimary(true);
+        image.setEntityId(productId);
+        image.setEntityType(Image.ImageEntityType.PRODUCT);
         Image updated = imageRepository.save(image);
 
         return mapToResponse(updated);
@@ -113,6 +115,8 @@ public class ImageServiceImpl implements ImageService {
                     .orElseThrow(() -> new ResourceNotFoundException("Image", "id", imageId));
 
             image.setDisplayOrder(i + 1);
+            image.setEntityId(productId);
+            image.setEntityType(Image.ImageEntityType.PRODUCT);
             images.add(imageRepository.save(image));
         }
 

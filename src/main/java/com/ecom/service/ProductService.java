@@ -18,6 +18,7 @@ public interface ProductService {
     PagedResponse<ProductResponse> getProducts(Pageable pageable, String search, Long categoryId, java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice);
 
     ProductResponse updateInventory(Long productId, Integer inventory);
+ProductResponse addProductImages(Long productId, List<MultipartFile> files);
 
     void deleteProduct(Long id);
 }
