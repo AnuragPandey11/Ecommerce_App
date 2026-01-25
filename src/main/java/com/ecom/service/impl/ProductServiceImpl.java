@@ -25,7 +25,7 @@ import com.ecom.entity.ProductImage;
 import com.ecom.exception.ResourceNotFoundException;
 import com.ecom.repository.CategoryRepository;
 import com.ecom.repository.ProductRepository;
-import com.ecom.util.FileUploadUtil;
+import com.ecom.service.R2StorageService;
 import com.ecom.service.ProductService;
 import com.ecom.util.HtmlSanitizerUtils;
 import com.ecom.util.SlugUtils;
@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final SlugUtils slugUtils;
     private final HtmlSanitizerUtils htmlSanitizerUtils;
-    private final FileUploadUtil fileUploadUtil;
+    private final R2StorageService r2StorageService;
     private final ProductSpecification productSpecification;
 
     @Override
@@ -80,8 +80,7 @@ public class ProductServiceImpl implements ProductService {
         if (images != null && !images.isEmpty()) {
             int order = 0;
             for (MultipartFile file : images) {
-                // ✅ FIXED: Changed from storeFile to uploadFile
-                String url = fileUploadUtil.uploadFile(file, "products");
+                String url = r2StorageService.uploadFile(file);
                 ProductImage image = ProductImage.builder()
                         .product(saved)
                         .imageUrl(url)
@@ -104,7 +103,7 @@ public class ProductServiceImpl implements ProductService {
             int currentOrder = product.getImages() != null ? product.getImages().size() : 0;
 
             for (MultipartFile file : files) {
-                String url = fileUploadUtil.uploadFile(file, "products");
+                String url = r2StorageService.uploadFile(file);
                 ProductImage image = ProductImage.builder()
                         .product(product)
                         .imageUrl(url)

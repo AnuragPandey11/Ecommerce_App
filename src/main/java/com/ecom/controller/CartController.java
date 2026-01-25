@@ -1,6 +1,7 @@
 package com.ecom.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('USER')")
 public class CartController {
 
     private final CartService cartService;
