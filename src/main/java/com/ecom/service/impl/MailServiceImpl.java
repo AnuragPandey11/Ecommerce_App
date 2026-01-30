@@ -16,8 +16,11 @@ public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${app.frontend.base-url:http://localhost:4200}")  
+    @Value("${app.frontend.base-url}")  
     private String frontendBaseUrl;
+    
+    @Value("${app.backend.base-url}")
+    private String backendBaseUrl;
     
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -30,7 +33,7 @@ public class MailServiceImpl implements MailService {
 
         
         // For testing in Postman, you can use the API endpoint directly
-        String apiVerifyUrl = "http://localhost:8080/api/auth/verify-email?token=" + token;
+        String apiVerifyUrl = backendBaseUrl + "/api/auth/verify-email?token=" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);

@@ -19,15 +19,17 @@ public class R2Config {
     @Value("${app.r2.secret-key}")
     private String secretKey;
 
-    @Value("${app.r2.account-id}")
-    private String accountId;
+
+
+    @Value("${app.r2.endpoint}")
+    private String r2Endpoint;
 
     @Bean
     public S3Client s3Client() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
         
         return S3Client.builder()
-                .endpointOverride(URI.create("https://" + accountId + ".r2.cloudflarestorage.com"))
+                .endpointOverride(URI.create(r2Endpoint))
                 .region(Region.US_EAST_1) // R2 requires a region setting, though it ignores it. US_EAST_1 is standard.
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .build();

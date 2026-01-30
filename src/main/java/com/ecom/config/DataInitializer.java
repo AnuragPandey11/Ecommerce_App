@@ -6,6 +6,7 @@ import com.ecom.repository.RoleRepository;
 import com.ecom.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,12 @@ public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.admin.email:admin@ecom.local}")
+    private String adminEmail;
+
+    @Value("${app.admin.password:Admin@12345}")
+    private String adminPassword;
 
     @Override
     public void run(String... args) {
@@ -59,7 +66,6 @@ public class DataInitializer implements CommandLineRunner {
         log.info("Roles initialized: ROLE_ADMIN, ROLE_STAFF, ROLE_USER");
 
         // Create default admin user
-        String adminEmail = "admin@ecom.local";
         if (!userRepository.existsByEmail(adminEmail)) {
             Set<Role> adminRoles = new HashSet<>();
             adminRoles.add(adminRole);
@@ -69,7 +75,7 @@ public class DataInitializer implements CommandLineRunner {
             User admin = User.builder()
                     .name("Super Admin")
                     .email(adminEmail)
-                    .passwordHash(passwordEncoder.encode("Admin@12345"))
+                    .passwordHash(passwordEncoder.encode(adminPassword))
                     .isVerified(true)
                     .roles(adminRoles)
                     .build();
@@ -77,7 +83,7 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(admin);
             log.info("✅ Created default admin user with email: {}", adminEmail);
             log.info("   Username: {}", adminEmail);
-            log.info("   Password: Admin@12345");
+            log.info("   Password: {}", adminPassword);
         } else {
             log.info("ℹ️  Admin user already exists, skipping creation");
         }
