@@ -46,11 +46,16 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+
+
+                        
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(
-                                
+                                "/**",
                                 "/api/auth/**",           // All auth endpoints
-                                "/oauth2/**",
-                                "/api/**",              // OAuth2 endpoints
+                                "/oauth2/**",              // OAuth2 endpoints
                                 "/login/oauth2/**",        // OAuth2 login endpoints
                                 "/api/images/**",
                                 "/v3/api-docs/**",
