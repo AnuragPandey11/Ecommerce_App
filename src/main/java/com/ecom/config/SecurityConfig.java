@@ -47,8 +47,10 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                
                                 "/api/auth/**",           // All auth endpoints
-                                "/oauth2/**",              // OAuth2 endpoints
+                                "/oauth2/**",
+                                "/api/**",              // OAuth2 endpoints
                                 "/login/oauth2/**",        // OAuth2 login endpoints
                                 "/api/images/**",
                                 "/v3/api-docs/**",
