@@ -18,6 +18,7 @@ public interface ProductService {
     PagedResponse<ProductResponse> getProducts(Pageable pageable, Long categoryId, String search);
 
     ProductResponse updateInventory(Long productId, Integer inventory);
+ProductResponse addProductImages(Long productId, List<MultipartFile> files);
 
     void deleteProduct(Long id);
 }

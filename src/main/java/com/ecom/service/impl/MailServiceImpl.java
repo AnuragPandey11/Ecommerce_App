@@ -16,7 +16,7 @@ public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${app.frontend.base-url:http://localhost:3000}")
+    @Value("${app.frontend.base-url:http://localhost:4200}")  
     private String frontendBaseUrl;
     
     @Value("${spring.mail.username}")
@@ -25,7 +25,9 @@ public class MailServiceImpl implements MailService {
     @Async("taskExecutor")
     @Override
     public void sendVerificationEmail(String toEmail, String token) {
-        String verifyUrl = frontendBaseUrl + "/verify-email?token=" + token;
+        String verifyUrl = frontendBaseUrl + "/auth/verify-email?token=" + token;  
+// ✅ MUST be /auth/verify-email (not /verify-email)
+
         
         // For testing in Postman, you can use the API endpoint directly
         String apiVerifyUrl = "http://localhost:8080/api/auth/verify-email?token=" + token;

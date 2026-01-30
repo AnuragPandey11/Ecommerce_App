@@ -35,4 +35,21 @@ public class CategoryController {
         List<CategoryResponse> responses = categoryService.getAllCategories();
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoryRequest request
+    ) {
+        CategoryResponse response = categoryService.updateCategory(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Category updated", response));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable Long id) {
+        categoryService.deleteCategory(id);
+        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully"));
+    }
 }
