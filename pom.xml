@@ -107,7 +107,13 @@
             <artifactId>jsoup</artifactId>
             <version>${jsoup.version}</version>
         </dependency>
-        
+        <!-- AWS SDK for S3 CDN for R2-->
+        <dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>s3</artifactId>
+    <version>2.25.11</version> <!-- Check for the latest version -->
+</dependency>
+
         <!-- MapStruct for DTO Mapping -->
         <dependency>
             <groupId>org.mapstruct</groupId>

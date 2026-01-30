@@ -4,19 +4,14 @@ package com.ecom.controller;
 import com.ecom.dto.ApiResponse;
 import com.ecom.dto.ImageResponse;
 import com.ecom.service.ImageService;
-import com.ecom.util.FileUploadUtil;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -25,7 +20,6 @@ import java.util.List;
 public class ImageController {
 
     private final ImageService imageService;
-    private final FileUploadUtil fileUploadUtil;
 
     // Upload multiple images for product/category
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -47,47 +41,6 @@ public class ImageController {
     ) {
         ImageResponse image = imageService.uploadSingleImage(file, altText);
         return ResponseEntity.ok(ApiResponse.success("Image uploaded successfully", image));
-    }
-
-    @GetMapping("/files/{filename:.+}")
-    public ResponseEntity<Resource> serveImage(@PathVariable String filename) {
-        try {
-            // 1. Define possible paths
-            Path rootPath = fileUploadUtil.getFilePath(filename);
-            Path productPath = fileUploadUtil.getFilePath("products/" + filename);
-
-            // 🛑 DEBUG LOGS (Check your Spring Boot Console for these!)
-            System.out.println("---------------- IMAGE DEBUG ----------------");
-            System.out.println("🔎 Requesting: " + filename);
-            System.out.println("📂 Checking Root: " + rootPath.toAbsolutePath());
-            System.out.println("📂 Checking Product Folder: " + productPath.toAbsolutePath());
-
-            Resource resource = new UrlResource(rootPath.toUri());
-
-            // 2. Check Root
-            if (resource.exists() && resource.isReadable()) {
-                System.out.println("✅ Found in Root!");
-                return ResponseEntity.ok().body(resource);
-            }
-
-            // 3. Check Product Folder
-            resource = new UrlResource(productPath.toUri());
-            if (resource.exists() && resource.isReadable()) {
-                System.out.println("✅ Found in Product Folder!");
-                 return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                        .body(resource);
-            }
-
-            System.out.println("❌ NOT FOUND in either location.");
-            System.out.println("---------------------------------------------");
-            return ResponseEntity.notFound().build();
-
-        } catch (Exception e) {
-            e.printStackTrace(); // Print full error if path is invalid
-            return ResponseEntity.notFound().build();
-        }
     }
 
     // Delete image
@@ -120,4 +73,3 @@ public class ImageController {
         return ResponseEntity.ok(ApiResponse.success("Images reordered successfully", reorderedImages));
     }
 }
-

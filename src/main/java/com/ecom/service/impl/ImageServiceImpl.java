@@ -6,7 +6,7 @@ import com.ecom.entity.Image;
 import com.ecom.exception.ResourceNotFoundException;
 import com.ecom.repository.ImageRepository;
 import com.ecom.service.ImageService;
-import com.ecom.util.FileUploadUtil;
+import com.ecom.service.R2StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class ImageServiceImpl implements ImageService {
 
     private final ImageRepository imageRepository;
-    private final FileUploadUtil fileUploadUtil;
+    private final R2StorageService r2StorageService;
 
     @Override
     public List<ImageResponse> uploadImages(MultipartFile[] files, List<String> altTexts) {
@@ -35,7 +35,7 @@ public class ImageServiceImpl implements ImageService {
             String altText = (altTexts != null && i < altTexts.size()) ? altTexts.get(i) : null;
 
             // Upload file
-            String fileUrl = fileUploadUtil.uploadFile(file, "products");
+            String fileUrl = r2StorageService.uploadFile(file);
 
             // Create image entity
             Image image = Image.builder()
@@ -58,7 +58,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public ImageResponse uploadSingleImage(MultipartFile file, String altText) {
-        String fileUrl = fileUploadUtil.uploadFile(file, "products");
+        String fileUrl = r2StorageService.uploadFile(file);
 
         Image image = Image.builder()
                 .url(fileUrl)
@@ -81,7 +81,7 @@ public class ImageServiceImpl implements ImageService {
                 .orElseThrow(() -> new ResourceNotFoundException("Image", "id", imageId));
 
         // Delete file from storage
-        fileUploadUtil.deleteFile(image.getUrl());
+        r2StorageService.deleteFile(image.getUrl());
 
         // Delete from database
         imageRepository.delete(image);
@@ -141,7 +141,7 @@ public class ImageServiceImpl implements ImageService {
         List<Image> images = imageRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(
                 Image.ImageEntityType.PRODUCT, productId);
 
-        images.forEach(image -> fileUploadUtil.deleteFile(image.getUrl()));
+        images.forEach(image -> r2StorageService.deleteFile(image.getUrl()));
         imageRepository.deleteByEntityTypeAndEntityId(Image.ImageEntityType.PRODUCT, productId);
     }
 
