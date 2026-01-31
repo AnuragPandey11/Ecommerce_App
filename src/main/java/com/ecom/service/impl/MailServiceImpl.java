@@ -42,22 +42,20 @@ public class MailServiceImpl implements MailService {
         message.setText(String.format("""
                 Hello!
                 
-                Welcome to our E-Commerce platform! 
+                Welcome Yap! 
                 
-                Please verify your email address to activate your account and start shopping.
+                Please verify your email address to activate your account and start browsing a wide array of amazing products.
                 
                 🔗 Click here to verify:
                 %s
-                
-                ⚠️ For testing purposes, you can also verify via API:
-                %s
+
                 
                 This link is valid for 24 hours.
                 
                 If you didn't create an account, please ignore this email.
                 
                 Best regards,
-                E-Commerce Team
+                Yap Team
                 """, verifyUrl, apiVerifyUrl));
 
         try {
@@ -89,7 +87,7 @@ public void sendPasswordResetEmail(String toEmail, String token) {
             If you didn't request this, please ignore this email.
             
             Best regards,
-            E-Commerce Team
+            Yap Team
             """, resetUrl));
 
     try {
