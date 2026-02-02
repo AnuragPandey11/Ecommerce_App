@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.Authentication; // Import this
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +19,7 @@ public class WishlistController {
 
     private final WishlistService wishlistService;
 
-    // Helper method to safely get UserPrincipal
+    // Helper to safely get UserPrincipal
     private UserPrincipal getPrincipal(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal)) {
             throw new RuntimeException("User not authenticated");

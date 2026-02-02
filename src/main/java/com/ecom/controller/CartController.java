@@ -2,15 +2,15 @@ package com.ecom.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.Authentication; // Import this
 import org.springframework.web.bind.annotation.*;
 
 import com.ecom.dto.ApiResponse;
 import com.ecom.dto.CartItemRequest;
 import com.ecom.dto.CartResponse;
+import com.ecom.dto.ApplyDiscountRequest;
 import com.ecom.security.UserPrincipal;
 import com.ecom.service.CartService;
-import com.ecom.dto.ApplyDiscountRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class CartController {
 
     private final CartService cartService;
 
-    // Helper method to safely get User ID
+    // Helper to safely get the User ID
     private Long getUserId(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal)) {
             throw new RuntimeException("User not authenticated");
@@ -36,7 +36,7 @@ public class CartController {
 
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<CartResponse>> addToCart(
-            Authentication authentication, // ✅ Use Authentication instead of @CurrentUser
+            Authentication authentication, // ✅ Use standard Authentication
             @Valid @RequestBody CartItemRequest request
     ) {
         Long userId = getUserId(authentication);
@@ -46,7 +46,7 @@ public class CartController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<CartResponse>> getCart(
-            Authentication authentication // ✅ Use Authentication instead of @CurrentUser
+            Authentication authentication // ✅ Use standard Authentication
     ) {
         Long userId = getUserId(authentication);
         try {
@@ -54,14 +54,14 @@ public class CartController {
             return ResponseEntity.ok(ApiResponse.success(response));
         } catch (Exception e) {
             log.error("Error fetching cart for user: {}", userId, e);
-            // Return empty cart structure if none exists/error to prevent frontend crash
-            return ResponseEntity.ok(ApiResponse.success(new CartResponse())); 
+            // Return empty cart if error/empty to prevent frontend crash
+            return ResponseEntity.ok(ApiResponse.success(new CartResponse()));
         }
     }
 
     @PostMapping("/apply-discount")
     public ResponseEntity<ApiResponse<CartResponse>> applyDiscount(
-            Authentication authentication, // ✅ Use Authentication instead of @CurrentUser
+            Authentication authentication, // ✅ Use standard Authentication
             @Valid @RequestBody ApplyDiscountRequest request
     ) {
         Long userId = getUserId(authentication);
