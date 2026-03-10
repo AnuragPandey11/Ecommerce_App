@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Repository
@@ -25,4 +26,12 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) AND p.isActive = true")
     Page<Product> searchByNameAndActive(@Param("keyword") String keyword, Pageable pageable);
+
+    boolean existsByCategoriesId(Long categoryId);
+
+    @Query("SELECT MIN(p.priceAfter) FROM Product p WHERE p.isActive = true")
+    BigDecimal findMinPrice();
+
+    @Query("SELECT MAX(p.priceAfter) FROM Product p WHERE p.isActive = true")
+    BigDecimal findMaxPrice();
 }

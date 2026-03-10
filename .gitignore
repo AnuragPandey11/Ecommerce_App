@@ -21,3 +21,6 @@ build/
 
 # Environment
 .env
+
+##local
+src/main/resources/application-dev.properties

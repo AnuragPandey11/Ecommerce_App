@@ -19,6 +19,7 @@ import com.ecom.entity.OrderStatus;
 import com.ecom.entity.Product;
 import com.ecom.entity.User;
 import com.ecom.exception.ResourceNotFoundException;
+import com.ecom.exception.UnauthorizedException;
 import com.ecom.repository.DiscountRepository;
 import com.ecom.repository.OrderRepository;
 import com.ecom.repository.ProductRepository;
@@ -87,10 +88,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponse> getOrdersForUser(UserPrincipal currentUser) {
+    public List<OrderResponse> getOrdersForUser(UserPrincipal currentUser, OrderStatus status) {
         User user = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + currentUser.getId()));
-        return orderRepository.findByUser(user).stream()
+        List<Order> orders = (status != null)
+                ? orderRepository.findByUserAndStatus(user, status)
+                : orderRepository.findByUser(user);
+        return orders.stream()
                 .map(this::mapOrderToOrderResponse)
                 .collect(Collectors.toList());
     }
@@ -100,10 +104,8 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
 
-        // Basic authorization check
         if (!order.getUser().getId().equals(currentUser.getId())) {
-            // We might want to check for admin role here in the future
-            throw new SecurityException("You are not authorized to view this order.");
+            throw new UnauthorizedException("You are not authorized to view this order");
         }
 
         return mapOrderToOrderResponse(order);

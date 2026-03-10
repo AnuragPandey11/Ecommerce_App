@@ -22,6 +22,8 @@ public class ProductResponse {
     private BigDecimal priceBefore;
     private BigDecimal priceAfter;
     private Integer inventory;
+    private Double averageRating;
+    private Integer reviewCount;
     private String descriptionHtml;
     private Boolean isActive;
     private Set<CategoryResponse> categories;

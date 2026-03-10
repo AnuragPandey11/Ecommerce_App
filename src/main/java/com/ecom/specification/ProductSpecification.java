@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Component
 public class ProductSpecification {
@@ -34,6 +35,17 @@ public class ProductSpecification {
         };
     }
 
+    public Specification<Product> inCategories(List<Long> categoryIds) {
+        return (root, query, cb) -> {
+            if (categoryIds == null || categoryIds.isEmpty()) {
+                return cb.conjunction();
+            }
+            query.distinct(true);
+            Join<Product, Category> categoryJoin = root.join("categories");
+            return categoryJoin.get("id").in(categoryIds);
+        };
+    }
+
     public Specification<Product> hasPriceBetween(BigDecimal minPrice, BigDecimal maxPrice) {
         return (root, query, cb) -> {
             if (minPrice == null && maxPrice == null) {
@@ -51,5 +63,18 @@ public class ProductSpecification {
 
     public Specification<Product> isActive() {
         return (root, query, cb) -> cb.isTrue(root.get("isActive"));
+    }
+
+    public Specification<Product> isInStock() {
+        return (root, query, cb) -> cb.greaterThan(root.get("inventory"), 0);
+    }
+
+    public Specification<Product> hasMinRating(Double minRating) {
+        return (root, query, cb) -> {
+            if (minRating == null) {
+                return cb.conjunction();
+            }
+            return cb.greaterThanOrEqualTo(root.get("averageRating"), minRating);
+        };
     }
 }

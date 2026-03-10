@@ -42,15 +42,22 @@ public class ProductController {
                 .body(ApiResponse.success("Product created successfully", response));
     }
 
+    @GetMapping("/filters")
+    public ResponseEntity<ApiResponse<com.ecom.dto.ProductFiltersResponse>> getProductFilters() {
+        return ResponseEntity.ok(ApiResponse.success(productService.getProductFilters()));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getProducts(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             @RequestParam(value = "sort", defaultValue = "createdAt,DESC") String sort,
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "categoryIds", required = false) List<Long> categoryIds,
             @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
-            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Boolean inStock,
+            @RequestParam(required = false) Double minRating
     ) {
         String[] sortParams = sort.split(",");
         Sort.Direction direction = sortParams.length > 1
@@ -63,7 +70,7 @@ public class ProductController {
         );
 
         PagedResponse<ProductResponse> paged = productService.getProducts(
-                pageable, search, categoryId, minPrice, maxPrice
+                pageable, search, categoryIds, minPrice, maxPrice, inStock, minRating
         );
         return ResponseEntity.ok(ApiResponse.success(paged));
     }
@@ -90,6 +97,6 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-        return ResponseEntity.ok(ApiResponse.success("Product deleted successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Product deleted successfully", null));
     }
 }

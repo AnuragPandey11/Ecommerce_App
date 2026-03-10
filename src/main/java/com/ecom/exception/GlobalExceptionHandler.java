@@ -8,15 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
@@ -32,22 +28,15 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(
+    public ResponseEntity<ApiResponse<Object>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        
-        log.error("Validation errors: {}", errors);
+        String message = ex.getBindingResult().getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(java.util.stream.Collectors.joining(", "));
+
+        log.error("Validation errors: {}", message);
         return new ResponseEntity<>(
-                ApiResponse.<Map<String, String>>builder()
-                        .success(false)
-                        .message("Validation failed")
-                        .data(errors)
-                        .build(),
+                ApiResponse.error(message),
                 HttpStatus.BAD_REQUEST
         );
     }
@@ -74,11 +63,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
         log.error("File size exceeded: {}", ex.getMessage());
         return new ResponseEntity<>(
-                ApiResponse.error("File size exceeds maximum limit"),
+                ApiResponse.error("File size exceeds the maximum allowed limit (5MB per file, 10MB per request)"),
                 HttpStatus.PAYLOAD_TOO_LARGE
         );
     }
-    
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error("Invalid argument: {}", ex.getMessage());
+        return new ResponseEntity<>(
+                ApiResponse.error(ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGlobalException(Exception ex, WebRequest request) {
         log.error("Unhandled exception: ", ex);

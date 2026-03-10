@@ -8,6 +8,7 @@ import com.ecom.entity.Category;
 import com.ecom.exception.BadRequestException;
 import com.ecom.exception.ResourceNotFoundException;
 import com.ecom.repository.CategoryRepository;
+import com.ecom.repository.ProductRepository;
 import com.ecom.service.CategoryService;
 import com.ecom.util.SlugUtils;
 
@@ -23,6 +24,7 @@ import java.util.*;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final SlugUtils slugUtils;
 
     @Override
@@ -129,6 +131,11 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
+
+        if (productRepository.existsByCategoriesId(id)) {
+            throw new BadRequestException("Cannot delete category because it has associated products. Remove or reassign those products first.");
+        }
+
         categoryRepository.delete(category);
     }
 }

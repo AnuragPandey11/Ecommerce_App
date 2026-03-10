@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ecom.dto.CategoryResponse;
 import com.ecom.dto.PagedResponse;
+import com.ecom.dto.ProductFiltersResponse;
 import com.ecom.dto.ProductImageResponse;
 import com.ecom.dto.ProductRequest;
 import com.ecom.dto.ProductResponse;
@@ -156,11 +157,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     @Override
-    public PagedResponse<ProductResponse> getProducts(Pageable pageable, String search, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
+    public PagedResponse<ProductResponse> getProducts(Pageable pageable, String search, List<Long> categoryIds,
+            BigDecimal minPrice, BigDecimal maxPrice, Boolean inStock, Double minRating) {
         Specification<Product> spec = Specification.where(productSpecification.isActive())
                 .and(productSpecification.hasNameOrDescription(search))
-                .and(productSpecification.inCategory(categoryId))
-                .and(productSpecification.hasPriceBetween(minPrice, maxPrice));
+                .and(productSpecification.inCategories(categoryIds))
+                .and(productSpecification.hasPriceBetween(minPrice, maxPrice))
+                .and(Boolean.TRUE.equals(inStock) ? productSpecification.isInStock() : Specification.where(null))
+                .and(productSpecification.hasMinRating(minRating));
 
         Page<Product> page = productRepository.findAll(spec, pageable);
 
@@ -176,6 +180,27 @@ public class ProductServiceImpl implements ProductService {
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
                 .last(page.isLast())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ProductFiltersResponse getProductFilters() {
+        List<CategoryResponse> categories = categoryRepository.findAll().stream()
+                .map(cat -> CategoryResponse.builder()
+                        .id(cat.getId())
+                        .name(cat.getName())
+                        .slug(cat.getSlug())
+                        .description(cat.getDescription())
+                        .parentId(cat.getParent() != null ? cat.getParent().getId() : null)
+                        .createdAt(cat.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ProductFiltersResponse.builder()
+                .categories(categories)
+                .minPrice(productRepository.findMinPrice())
+                .maxPrice(productRepository.findMaxPrice())
                 .build();
     }
 
@@ -269,6 +294,8 @@ public class ProductServiceImpl implements ProductService {
                 .priceBefore(product.getPriceBefore())
                 .priceAfter(product.getPriceAfter())
                 .inventory(product.getInventory())
+                .averageRating(product.getAverageRating())
+                .reviewCount(product.getReviewCount())
                 .descriptionHtml(product.getDescriptionHtml())
                 .isActive(product.getIsActive())
                 .categories(categoryResponses)

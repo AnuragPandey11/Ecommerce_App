@@ -1,5 +1,6 @@
 package com.ecom.controller;
 
+import com.ecom.dto.ApiResponse;
 import com.ecom.dto.ReviewRequest;
 import com.ecom.dto.ReviewResponse;
 import com.ecom.security.CurrentUser;
@@ -23,24 +24,27 @@ public class ReviewController {
 
     @PostMapping("/products/{productId}/reviews")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReviewResponse> addReview(@PathVariable Long productId,
-                                                    @Valid @RequestBody ReviewRequest reviewRequest,
-                                                    @CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<ApiResponse<ReviewResponse>> addReview(
+            @PathVariable Long productId,
+            @Valid @RequestBody ReviewRequest reviewRequest,
+            @CurrentUser UserPrincipal currentUser) {
         ReviewResponse reviewResponse = reviewService.addReview(productId, reviewRequest, currentUser);
-        return new ResponseEntity<>(reviewResponse, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Review submitted successfully", reviewResponse));
     }
 
     @GetMapping("/products/{productId}/reviews")
-    public ResponseEntity<List<ReviewResponse>> getReviewsForProduct(@PathVariable Long productId) {
+    public ResponseEntity<ApiResponse<List<ReviewResponse>>> getReviewsForProduct(@PathVariable Long productId) {
         List<ReviewResponse> reviews = reviewService.getReviewsForProduct(productId);
-        return ResponseEntity.ok(reviews);
+        return ResponseEntity.ok(ApiResponse.success(reviews));
     }
 
     @DeleteMapping("/reviews/{reviewId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId,
-                                           @CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<ApiResponse<String>> deleteReview(
+            @PathVariable Long reviewId,
+            @CurrentUser UserPrincipal currentUser) {
         reviewService.deleteReview(reviewId, currentUser);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Review deleted successfully", null));
     }
 }

@@ -53,7 +53,7 @@ public class UserController {
     ) {
         String email = authentication.getName();
         userService.changePassword(email, request);
-        return ResponseEntity.ok(ApiResponse.success("Password changed successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
     }
 
     // Get all users (Admin only) - WITH PAGINATION
@@ -97,6 +97,6 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok(ApiResponse.success("User deleted successfully"));
+        return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
     }
 }

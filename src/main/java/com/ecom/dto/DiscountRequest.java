@@ -12,20 +12,20 @@ import java.time.LocalDateTime;
 
 @Data
 public class DiscountRequest {
-    @NotBlank
+    @NotBlank(message = "Discount code is required")
     private String code;
 
-    @NotNull
+    @NotNull(message = "Discount type is required")
     private DiscountType discountType;
 
-    @NotNull
-    @DecimalMin("0.01")
+    @NotNull(message = "Discount value is required")
+    @DecimalMin(value = "0.01", message = "Discount value must be greater than 0")
     private BigDecimal discountValue;
 
-    @Future
+    @Future(message = "Expiry date must be in the future")
     private LocalDateTime expiryDate;
 
-    @NotNull
+    @NotNull(message = "Active status is required")
     private Boolean isActive;
 
     private Integer maxUsage;
