@@ -13,6 +13,7 @@ import com.ecom.service.CategoryService;
 import com.ecom.util.SlugUtils;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,14 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category saved = categoryRepository.save(category);
 
-        return CategoryResponse.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .slug(saved.getSlug())
-                .description(saved.getDescription())
-                .parentId(saved.getParent() != null ? saved.getParent().getId() : null)
-                .createdAt(saved.getCreatedAt())
-                .build();
+        return toResponse(saved);
     }
 
     @Transactional(readOnly = true)
@@ -70,16 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> categories = categoryRepository.findAll();
         List<CategoryResponse> responses = new ArrayList<>();
         for (Category cat : categories) {
-            responses.add(
-                    CategoryResponse.builder()
-                            .id(cat.getId())
-                            .name(cat.getName())
-                            .slug(cat.getSlug())
-                            .description(cat.getDescription())
-                            .parentId(cat.getParent() != null ? cat.getParent().getId() : null)
-                            .createdAt(cat.getCreatedAt())
-                            .build()
-            );
+            responses.add(toResponse(cat));
         }
         return responses;
     }
@@ -117,14 +102,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category saved = categoryRepository.save(category);
 
-        return CategoryResponse.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .slug(saved.getSlug())
-                .description(saved.getDescription())
-                .parentId(saved.getParent() != null ? saved.getParent().getId() : null)
-                .createdAt(saved.getCreatedAt())
-                .build();
+        return toResponse(saved);
     }
 
     @Override
@@ -137,5 +115,21 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         categoryRepository.delete(category);
+    }
+
+    private CategoryResponse toResponse(Category cat) {
+        List<String> images = productRepository.findFirstProductImageByCategoryId(
+                cat.getId(), PageRequest.of(0, 1));
+        String imageUrl = images.isEmpty() ? null : images.get(0);
+
+        return CategoryResponse.builder()
+                .id(cat.getId())
+                .name(cat.getName())
+                .slug(cat.getSlug())
+                .description(cat.getDescription())
+                .parentId(cat.getParent() != null ? cat.getParent().getId() : null)
+                .imageUrl(imageUrl)
+                .createdAt(cat.getCreatedAt())
+                .build();
     }
 }
