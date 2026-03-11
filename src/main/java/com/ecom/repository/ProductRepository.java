@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,4 +35,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT MAX(p.priceAfter) FROM Product p WHERE p.isActive = true")
     BigDecimal findMaxPrice();
+
+    @Query("SELECT pi.imageUrl FROM ProductImage pi JOIN pi.product p JOIN p.categories c " +
+           "WHERE c.id = :categoryId AND p.isActive = true AND pi.isPrimary = true ORDER BY p.id ASC")
+    List<String> findFirstProductImageByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
 }

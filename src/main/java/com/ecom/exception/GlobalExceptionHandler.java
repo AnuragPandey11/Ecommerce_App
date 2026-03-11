@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,6 +48,24 @@ public class GlobalExceptionHandler {
         log.error("Bad credentials: {}", ex.getMessage());
         return new ResponseEntity<>(
                 ApiResponse.error("Invalid email or password"),
+                HttpStatus.UNAUTHORIZED
+        );
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDisabledException(DisabledException ex) {
+        log.warn("Login attempt on unverified account");
+        return new ResponseEntity<>(
+                ApiResponse.error("Your account is not verified. Please check your email to verify your account."),
+                HttpStatus.UNAUTHORIZED
+        );
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleLockedException(LockedException ex) {
+        log.warn("Login attempt on locked account");
+        return new ResponseEntity<>(
+                ApiResponse.error("Your account has been locked due to too many failed login attempts. Please try again later."),
                 HttpStatus.UNAUTHORIZED
         );
     }
