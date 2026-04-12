@@ -22,7 +22,7 @@ ENTRYPOINT ["java", \
   "-Xms128m", "-Xmx320m", \
   "-Xss256k", \
   "-XX:+UseG1GC", \
-  "-XX:MaxMetaspaceSize=96m", \
+  "-XX:MaxMetaspaceSize=160m", \
   "-XX:ReservedCodeCacheSize=64m", \
   "-XX:+UseContainerSupport", \
   "-XX:+OptimizeStringConcat", \
