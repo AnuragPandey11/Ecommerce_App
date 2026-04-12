@@ -22,9 +22,9 @@ public class AsyncConfig implements AsyncConfigurer {
     @Bean(name = "taskExecutor")
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);          // tune for your expected concurrency
-        executor.setMaxPoolSize(16);          // upper bound for spikes
-        executor.setQueueCapacity(500);       // backlog before rejecting
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(200);
         executor.setThreadNamePrefix("async-exec-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);

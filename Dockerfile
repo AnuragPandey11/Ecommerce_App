@@ -18,4 +18,13 @@ COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Xms256m", "-Xmx350m", "-jar", "app.jar"]
+ENTRYPOINT ["java", \
+  "-Xms128m", "-Xmx320m", \
+  "-Xss256k", \
+  "-XX:+UseG1GC", \
+  "-XX:MaxMetaspaceSize=96m", \
+  "-XX:ReservedCodeCacheSize=64m", \
+  "-XX:+UseContainerSupport", \
+  "-XX:+OptimizeStringConcat", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-jar", "app.jar"]
